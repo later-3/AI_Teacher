@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>课程：{{ course.name }}</h1>
+<p>{{ course.description }}</p>
+
+<div class="section">
+  <h3>向量化状态</h3>
+  {% if request.query_params.get("embedding") == "enqueued" %}
+    <div class="alert success">已将该课程加入向量化队列。</div>
+  {% elif request.query_params.get("embedding") == "busy" %}
+    <div class="alert warning">向量化任务正在进行或等待中，请稍候。</div>
+  {% endif %}
+  <p><strong>状态：</strong>{{ course.embedding_status.value }}</p>
+  <p>
+    <strong>进度：</strong>
+    {{ "%.1f"|format(course.embedding_progress if course.embedding_progress is not none else 0.0) }}%
+  </p>
+  <p>
+    <strong>向量条数：</strong>
+    {% if vector_count is none %}—{% else %}{{ vector_count }}{% endif %}
+  </p>
+  {% if course.embedding_error %}
+    <p><strong>最新错误：</strong>{{ course.embedding_error }}</p>
+  {% endif %}
+  <form method="post" action="/admin/courses/{{ course.id }}/trigger-embedding">
+    <button type="submit" {% if embedding_busy %}disabled{% endif %}>
+      {% if embedding_busy %}向量化进行中{% else %}触发向量化{% endif %}
+    </button>
+  </form>
+</div>
+
+<div class="grid">
+  <div class="section">
+    <h3>新增资源（URL）</h3>
+    <form method="post" action="/admin/courses/{{ course.id }}/resource-url">
+      <label>显示名称</label>
+      <input type="text" name="display_name" required>
+      <label>资源类型</label>
+      <select name="resource_type">
+        <option value="video">Video</option>
+        <option value="pdf">PDF</option>
+        <option value="ppt">PPT</option>
+        <option value="text">Text</option>
+        <option value="markdown">Markdown</option>
+      </select>
+      <label>URL</label>
+      <input type="text" name="source_url" required>
+      <input type="submit" value="添加资源">
+    </form>
+  </div>
+
+  <div class="section">
+    <h3>上传文件（PPT/PDF/Text）</h3>
+    <form method="post" enctype="multipart/form-data" action="/admin/courses/{{ course.id }}/resource-upload">
+      <label>显示名称</label>
+      <input type="text" name="display_name" placeholder="默认使用文件名">
+      <label>文件类型</label>
+      <select name="resource_type">
+        <option value="pdf">PDF</option>
+        <option value="ppt">PPT</option>
+        <option value="text">Text</option>
+        <option value="markdown">Markdown</option>
+      </select>
+      <label>选择文件</label>
+      <input type="file" name="file" required>
+      <input type="submit" value="上传并处理">
+    </form>
+  </div>
+</div>
+
+<div class="section">
+  <h3>资源列表</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>类型</th>
+        <th>名称</th>
+        <th>状态</th>
+        <th>阶段</th>
+        <th>创建时间</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for res in resources %}
+      <tr>
+        <td>{{ res.id }}</td>
+        <td>{{ res.resource_type.value }}</td>
+        <td>{{ res.display_name or res.original_filename }}</td>
+        <td>{{ res.status.value }}</td>
+        <td>{{ res.processing_stage.value }}</td>
+        <td>{{ res.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>小节 ({{ sections|length }})</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>标题</th>
+        <th>顺序</th>
+        <th>摘要</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for section in sections %}
+      <tr>
+        <td>{{ section.id }}</td>
+        <td>{{ section.title }}</td>
+        <td>{{ section.order_in_lecture }}</td>
+        <td>{{ section.summary[:120] if section.summary else '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>Chunks（最多展示 100 条）</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Section</th>
+        <th>tokens</th>
+        <th>文本</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for chunk in chunks %}
+      <tr>
+        <td>{{ chunk.id }}</td>
+        <td>{{ chunk.section_id }}</td>
+        <td>{{ chunk.tokens_estimate }}</td>
+        <td>{{ chunk.text[:160] }}{% if chunk.text|length > 160 %}...{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>课程列表</h1>
+
+<form method="post" action="/admin/courses">
+  <h3>新建课程</h3>
+  <label>课程名称</label>
+  <input type="text" name="name" required>
+  <label>描述</label>
+  <textarea name="description" rows="2"></textarea>
+  <input type="submit" value="创建课程">
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>名称</th>
+      <th>资源数</th>
+      <th>小节数</th>
+      <th>向量状态</th>
+      <th>向量条数</th>
+      <th>创建时间</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in course_stats %}
+    <tr>
+      <td>{{ item.course.id }}</td>
+      <td>{{ item.course.name }}</td>
+      <td>{{ item.resource_count }}</td>
+      <td>{{ item.section_count }}</td>
+      <td>
+        {{ item.course.embedding_status.value }}
+        {% if item.course.embedding_progress %}
+          ({{ "%.1f"|format(item.course.embedding_progress) }}%)
+        {% endif %}
+      </td>
+      <td>
+        {% if item.vector_count is none %}
+          —
+        {% else %}
+          {{ item.vector_count }}
+        {% endif %}
+      </td>
+      <td>{{ item.course.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td><a href="/admin/courses/{{ item.course.id }}">详情</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

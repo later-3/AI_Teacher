@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or "AI Teacher Admin" }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
+    header { margin-bottom: 20px; }
+    nav a { margin-right: 12px; color: #0366d6; text-decoration: none; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; }
+    th, td { padding: 8px 12px; border-bottom: 1px solid #ddd; text-align: left; }
+    th { background: #f0f0f0; }
+    form { background: #fff; padding: 12px; border: 1px solid #ddd; margin-bottom: 20px; }
+    input[type="text"], textarea, select { width: 100%; padding: 8px; margin: 6px 0 12px 0; }
+    input[type="file"] { margin: 6px 0 12px 0; }
+    input[type="submit"], button { padding: 8px 16px; background: #0366d6; color: #fff; border: none; cursor: pointer; }
+    .section { background: #fff; padding: 16px; margin-bottom: 20px; border: 1px solid #ddd; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .alert { padding: 10px 14px; margin-bottom: 12px; border-radius: 4px; }
+    .alert.success { background: #d1fae5; color: #065f46; }
+    .alert.warning { background: #fef3c7; color: #92400e; }
+    .alert.error { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/admin/courses">课程列表</a>
+    </nav>
+  </header>
+  {% block content %}{% endblock %}
+</body>
+</html>
